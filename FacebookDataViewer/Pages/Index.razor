@@ -1,0 +1,101 @@
+﻿@page "/"
+@using FacebookDataViewer.Data.Dto
+@using System.Text
+
+<PageTitle>Index</PageTitle>
+
+<div class="fileInputContainer">
+    <InputFile OnChange="FileChanged" accept=".zip"/>
+    <button onclick="@GetConversationsFromDb">Get messages from DB</button>
+</div>
+
+<div class="dataViewer">
+    <div class="messageSelectorContainer">
+        @if (Messages != null)
+        {
+            @foreach (string msg in Messages)
+            {
+                <button @onclick="() => ChangeConversation(msg)">@FixEmoji(msg)</button>
+            }
+        }
+    </div>
+    <div id="msgs" class="messageContainer" onscroll="checkScrollProgress(this)">
+        @if (SelectedConversation != null)
+        {
+            <div class="filterBar" id="filterBar">
+                <div class="filterHeader">
+                    <h3>Filter</h3>
+                    <span onclick="openFilter()" id="filterArrow">\/</span>
+                </div>
+                <div class="filtersContainer">
+                    <div>
+                        <h5>Participants:</h5>
+                        @foreach (var participant in SelectedConversation.Participants)
+                        {
+                            <div class="checkboxFilter">
+                                <input type="checkbox" checked="@_participantFilter[participant.Name]" @oninput="e => ParticipantCheckboxChanged(e, participant.Name)"/>
+                                <p>@participant.Name</p>
+                            </div>
+                        }
+                    </div>
+                    <div>
+                        <h5>Media:</h5>
+                        <div class="checkboxFilter">
+                            <input type="checkbox" checked="@_textFilter" @oninput='e => MediaCheckboxChanged(e, "Text")'/>
+                            <p>Text</p>
+                        </div>
+                        <div class="checkboxFilter">
+                            <input type="checkbox" checked="@_imageFilter" @oninput='e => MediaCheckboxChanged(e, "Images")'/>
+                            <p>Images</p>
+                        </div>
+                        <div class="checkboxFilter">
+                            <input type="checkbox" checked="@_stickerFilter" @oninput='e => MediaCheckboxChanged(e, "Stickers")'/>
+                            <p>Stickers</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            @for (int i = 0; i < (LoadedMessageCount < FilteredConversation.Messages.Count ? LoadedMessageCount : FilteredConversation.Messages.Count); i++)
+            {
+                <div class="messageRow">
+                    <div class="headerInfo">
+                        <h5>@FilteredConversation.Messages[i].Sender_Name</h5>
+                        <h6 class="timestamp">@(new DateTime(1970, 1, 1).AddMilliseconds(SelectedConversation.Messages[i].Timestamp_Ms))</h6>
+                    </div>
+
+                    @if (FilteredConversation.Messages[i].Content != null)
+                    {
+                        @if (Encoding.UTF8.GetBytes(FilteredConversation.Messages[i].Content).Length > FilteredConversation.Messages[i].Content.Length)
+                        {
+                            <p>@FixEmoji(FilteredConversation.Messages[i].Content)</p>
+                        }
+                        else
+                        {
+                            <p>@FilteredConversation.Messages[i].Content</p>
+                        }
+                    }
+
+                    @if (FilteredConversation.Messages[i].Photos != null)
+                    {
+                        @foreach (Photo photo in FilteredConversation.Messages[i].Photos)
+                        {
+                            @if (_databaseService.TryGetImage(photo.Uri, out string content))
+                            {
+                                <img src="data:image/png;base64, @content"/>
+                            }
+                        }
+                    }
+
+                    @if (FilteredConversation.Messages[i].Sticker != null)
+                    {
+                        @if (_databaseService.TryGetImage(FilteredConversation.Messages[i].Sticker.Uri, out string content))
+                        {
+                            <img src="data:image/png;base64, @content"/>
+                        }
+                    }
+                </div>
+            }
+        }
+    </div>
+</div>

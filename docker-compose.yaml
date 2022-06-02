@@ -1,0 +1,12 @@
+services:
+  mongo:
+    image: mongo
+    restart: always
+    ports:
+      - "27017:27017"
+  facebook-data-viewer:
+    build: .
+    ports:
+      - "5009:80"
+    links:
+      - mongo
