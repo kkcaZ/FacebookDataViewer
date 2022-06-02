@@ -1,6 +1,7 @@
 using System.Text.Json;
 using FacebookDataViewer.Data.Dto;
 using FacebookDataViewer.Services.Interfaces;
+using FacebookDataViewer.Settings;
 using MongoDB.Driver;
 using MongoDB.Bson;
 
@@ -10,21 +11,25 @@ public class DatabaseService : IDatabaseService
 {
     private readonly MongoClient _client;
     private readonly IMongoDatabase _database;
-    private readonly ILogger _logger;
+    private readonly ILogger<DatabaseService> _logger;
+    private readonly IConfiguration _configuration;
     
     JsonSerializerOptions jsonCaseOptions = new JsonSerializerOptions() { PropertyNameCaseInsensitive = true };
     
-    public DatabaseService(ILogger<DatabaseService> logger)
+    public DatabaseService(ILogger<DatabaseService> logger, IConfiguration configuration)
     {
         _logger = logger;
-        
-        _logger.LogInformation("Connecting to database");
+        _configuration = configuration;
+
+        var section = _configuration.GetSection(nameof(MongoSettings));
+        var mongoConfig = section.Get<MongoSettings>();
+
+        _logger.LogInformation($"Connecting to database - {mongoConfig.ConnectionString}");
         _client = new MongoClient(
-            "mongodb://mongo:27017/"
+            mongoConfig.ConnectionString
         );
 
         _database = _client.GetDatabase("facebook-data");
-        _logger.LogInformation("Database started");
     }
     
     /// <inheritdoc />

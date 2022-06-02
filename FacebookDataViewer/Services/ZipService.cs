@@ -17,9 +17,10 @@ public class ZipService : IZipService
     private readonly IDatabaseService _databaseService;
     private readonly ILogger<ZipService> _logger;
     
-    public ZipService(IDatabaseService databaseService)
+    public ZipService(IDatabaseService databaseService, ILogger<ZipService> logger)
     {
         _databaseService = databaseService;
+        _logger = logger;
     }
     
     /// <inheritdoc />

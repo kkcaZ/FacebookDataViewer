@@ -20,7 +20,7 @@ public partial class Index
     [Inject] IScrollInfoService _scrollInfoService { get; set; }
     [Inject] IDatabaseService _databaseService { get; set; }
     [Inject] IZipService _zipService { get; set; }
-    [Inject] ILogger _logger { get; set; }
+    [Inject] ILogger<Index> _logger { get; set; }
     
     // Messages
     private List<string> Messages { get; set; }
