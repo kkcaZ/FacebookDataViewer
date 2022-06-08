@@ -7,6 +7,6 @@ Clone the repository
 > cd FacebookDataViewer 
 
 Run docker compose
-> sudo docker-compose up
+> docker-compose up
 
 Navigate to **http://localhost:5009** to view the application
